@@ -31,7 +31,7 @@ double temp_calc() {
 
 /*Essa função é necessária para gerar os números aleatórios entre o valor mínimo e o valor máximo
 Usaremos o valor criado dentro desta função para popular as matrizes com o valor aleatórios necessário */
-double num_aleatorio(double min, double max) {
+double rand_double(double min, double max) {
     return min + (max - min) * ((double) rand() / (double) RAND_MAX);
 }
 
@@ -308,6 +308,19 @@ double erro_max(const double *x, const double *x_true, int n) {
     }
 
     return max_err;
+}
+
+void free_matrix(bandaMatriz *A) {
+    if (A == NULL) {
+        return;
+    }
+
+    for (int d = 0; d<= A->meia_banda; d++) {
+        free(A->diag[d]);
+    }
+
+    free(A->diag);
+    free(A);
 }
 
 int main (int args, char **argv) {

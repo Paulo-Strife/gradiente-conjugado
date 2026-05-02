@@ -1,11 +1,13 @@
 CC = gcc
 CFLAGS = -Wall -Wextra -O2
 LDFLAGS = -lm
+TARGET = cgSolver.exe
+SRC = cgSolver.c
 
-all: cgSolver
+all: $(TARGET)
 
-cgSolver: cgSolver.c
-	$(CC) $(CFLAGS) cgSolver.c -o cgSolver $(LDFLAGS)
+$(TARGET): $(SRC)
+	$(CC) $(CFLAGS) $(SRC) -o $(TARGET) $(LDFLAGS)
 
 clean:
-	rm -f cgSolver
+	del /Q $(TARGET)
