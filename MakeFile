@@ -1,0 +1,11 @@
+CC = gcc
+CFLAGS = -Wall -Wextra -O2
+LDFLAGS = -lm
+
+all: cgSolver
+
+cgSolver: cgSolver.c
+	$(CC) $(CFLAGS) cgSolver.c -o cgSolver $(LDFLAGS)
+
+clean:
+	rm -f cgSolver
