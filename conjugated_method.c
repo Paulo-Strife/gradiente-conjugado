@@ -169,6 +169,51 @@ Agora começaremos a aplicar o método do gradiente conjugado
 
 A x = b
 */
+void print_vetor(const char *nome, const double *v, int n) {
+    printf("%s = [", nome);
+
+    for (int i = 0; i < n; i++) {
+        printf("%.8f", v[i]);
+
+        if (i < n - 1) {
+            printf(", ");
+        }
+    }
+
+    printf("]\n");
+}
+
+double pega_valor_matriz(const bandaMatriz *A, int i, int j) {
+    int diff = j - i;
+
+    if (diff < 0) {
+        diff = -diff;
+    }
+
+    if (diff > A->meia_banda) {
+        return 0.0;
+    }
+
+    if (j >= i) {
+        return A->diag[diff][i];
+    } else {
+        return A->diag[diff][j];
+    }
+}
+
+void print_matriz_completa(const bandaMatriz *A) {
+    for (int i = 0; i < A->n; i++){
+        printf("[ ");
+
+        for (int j = 0; j < A->n; j++) {
+            printf("%.12f ", pega_valor_matriz(A, i, j));
+        }
+
+        printf("]\n");
+    }
+
+    printf("\n");
+}
 
 int gradiente_conjugado(
     const bandaMatriz *A,
@@ -176,9 +221,15 @@ int gradiente_conjugado(
     double *x,
     int iter,
     double tol,
-    GCstatus *stats
+    GCstatus *stats,
+    int debug
 ) {
     int n = A->n;
+
+    if (debug) {
+        printf("\n====================== MATRIZ DO SISTEMA ======================\n");
+        print_matriz_completa(A);
+    }
 
     double *r = (double *) malloc(n * sizeof(double));
     double *p = (double *) malloc(n * sizeof(double));
@@ -192,10 +243,8 @@ int gradiente_conjugado(
     stats->time_matvec = 0.0;
     stats->time_ponto = 0.0;
     stats->time_att = 0.0;
-    stats->iteracoes = 0.0;
+    stats->iteracoes = 0;
     stats->final_residual = 0.0;
-
-    // aqui fazemos r= b - A*x
 
     double t0 = temp_calc();
     multiplicacao_matrizes(A, x, Ap);
@@ -212,6 +261,15 @@ int gradiente_conjugado(
 
     stats->time_att += t1 - t0;
 
+    if (debug) {
+        printf("\n========== INICIO DO GRADIENTE CONJUGADO ==========\n");
+        print_vetor("x inicial", x, n);
+        print_vetor("b", b, n);
+        print_vetor("Ax inicial", Ap, n);
+        print_vetor("r inicial = b - Ax", r, n);
+        print_vetor("p inicial = r", p, n);
+    }
+
     t0 = temp_calc();
     double rs_antigo = produto(r, r, n);
     t1 = temp_calc();
@@ -219,6 +277,11 @@ int gradiente_conjugado(
     stats->time_ponto += t1 - t0;
 
     double residuo_inicial = sqrt(rs_antigo);
+
+    if (debug) {
+        printf("\nrs_antigo = r^T r = %.12f\n", rs_antigo);
+        printf("residuo inicial = sqrt(rs_antigo) = %.12f\n", residuo_inicial);
+    }
 
     if (residuo_inicial < tol) {
         stats->final_residual = residuo_inicial;
@@ -229,18 +292,37 @@ int gradiente_conjugado(
     }
 
     for (int k = 0; k < iter; k++) {
-        // Ap = A * p
+        if (debug) {
+            printf("\n========================================\n");
+            printf("ITERACAO %d\n", k + 1);
+            printf("========================================\n");
+            print_vetor("x atual", x, n);
+            print_vetor("r atual", r, n);
+            print_vetor("p atual", p, n);
+            printf("rs_antigo = %.12f\n", rs_antigo);
+        }
+
         t0 = temp_calc();
         multiplicacao_matrizes(A, p, Ap);
         t1 = temp_calc();
 
         stats->time_matvec += t1 - t0;
 
+        if (debug) {
+            printf("\n1) Ap = A * p\n");
+            print_vetor("Ap", Ap, n);
+        }
+
         t0 = temp_calc();
         double pAp = produto(p, Ap, n);
         t1 = temp_calc();
 
-        stats->time_ponto += t1 -t0;
+        stats->time_ponto += t1 - t0;
+
+        if (debug) {
+            printf("\n2) pAp = p^T Ap\n");
+            printf("pAp = %.12f\n", pAp);
+        }
 
         if (fabs(pAp) < 1e-30) {
             printf("Erro numerico, p^T A p é muito pequeno\n");
@@ -249,15 +331,38 @@ int gradiente_conjugado(
 
         double alpha = rs_antigo / pAp;
 
+        if (debug) {
+            printf("\n3) alpha = rs_antigo / pAp\n");
+            printf("alpha = %.12f / %.12f = %.12f\n", rs_antigo, pAp, alpha);
+        }
+
+        if (debug) {
+            printf("\n4) Atualizando x e r\n");
+
+            for (int i = 0; i < n; i++) {
+                double novo_x = x[i] + alpha * p[i];
+                double novo_r = r[i] - alpha * Ap[i];
+
+                printf("x[%d] = %.12f + %.12f * %.12f = %.12f\n",
+                       i, x[i], alpha, p[i], novo_x);
+                printf("r[%d] = %.12f - %.12f * %.12f = %.12f\n",
+                       i, r[i], alpha, Ap[i], novo_r);
+            }
+        }
+
         t0 = temp_calc();
         for (int i = 0; i < n; i++) {
             x[i] = x[i] + alpha * p[i];
             r[i] = r[i] - alpha * Ap[i];
         }
-
         t1 = temp_calc();
 
         stats->time_att += t1 - t0;
+
+        if (debug) {
+            print_vetor("x novo", x, n);
+            print_vetor("r novo", r, n);
+        }
 
         t0 = temp_calc();
         double rs_novo = produto(r, r, n);
@@ -270,23 +375,56 @@ int gradiente_conjugado(
         stats->iteracoes = k + 1;
         stats->final_residual = residual;
 
+        if (debug) {
+            printf("\n5) Novo residuo\n");
+            printf("rs_novo = r^T r = %.12f\n", rs_novo);
+            printf("residual = sqrt(rs_novo) = %.12f\n", residual);
+        }
+
         if (residual < tol) {
+            if (debug) {
+                printf("\nCriterio de parada atingido\n");
+                printf("residual %.12f < tol %.12f\n", residual, tol);
+            }
             break;
         }
 
         double beta = rs_novo / rs_antigo;
 
-        // p = r + beta * p
+        if (debug) {
+            printf("\n6) beta = rs_novo / rs_antigo\n");
+            printf("beta = %.12f / %.12f = %.12f\n", rs_novo, rs_antigo, beta);
+        }
+
+        if (debug) {
+            printf("\n7) Atualizando p\n");
+
+            for (int i = 0; i < n; i++) {
+                double novo_p = r[i] + beta * p[i];
+
+                printf("p[%d] = %.12f + %.12f * %.12f = %.12f\n",
+                       i, r[i], beta, p[i], novo_p);
+            }
+        }
 
         t0 = temp_calc();
         for (int i = 0; i < n; i++) {
-            p[i] = r[i] + beta * p [i];
+            p[i] = r[i] + beta * p[i];
         }
         t1 = temp_calc();
 
         stats->time_att += t1 - t0;
 
+        if (debug) {
+            print_vetor("p novo", p, n);
+        }
+
         rs_antigo = rs_novo;
+
+        if (debug) {
+            printf("\nFim da iteracao %d\n", k + 1);
+            printf("rs_antigo recebe rs_novo: %.12f\n", rs_antigo);
+        }
     }
 
     free(r);
@@ -387,7 +525,8 @@ int main (int args, char **argv) {
     GCstatus status;
 
     t0 =  temp_calc();
-    gradiente_conjugado(A, b, x, max_iter, tol, &status);
+    int debug = (n <= 5);
+    gradiente_conjugado(A, b, x, max_iter, tol, &status, debug);
     t1 = temp_calc();
 
     double tempo_gc = t1 - t0;
