@@ -5,15 +5,6 @@
 #include <stdlib.h>
 #include <time.h>
 
-#ifdef LIKWID_PERFMON
-#include <likwid.h>
-#else
-#define LIKWID_MARKER_INIT
-#define LIKWID_MARKER_THREADINIT
-#define LIKWID_MARKER_START(region)
-#define LIKWID_MARKER_STOP(region)
-#define LIKWID_MARKER_CLOSE
-#endif
 
 typedef struct {
     int n;
@@ -192,28 +183,22 @@ int gradiente_conjugado(
     double t0, t1;
 
     t0 = temp_calc();
-    LIKWID_MARKER_START("matvec");
     multiplicacao_matrizes(A, x, Ap);
-    LIKWID_MARKER_STOP("matvec");
     t1 = temp_calc();
 
     stats->time_matvec += t1 - t0;
 
     t0 = temp_calc();
-    LIKWID_MARKER_START("init_r_p");
     for (int i = 0; i < n; i++) {
         r[i] = b[i] - Ap[i];
         p[i] = r[i];
     }
-    LIKWID_MARKER_STOP("init_r_p");
     t1 = temp_calc();
 
     stats->time_att += t1 - t0;
 
     t0 = temp_calc();
-    LIKWID_MARKER_START("dot");
     double rs_antigo = produto(r, r, n);
-    LIKWID_MARKER_STOP("dot");
     t1 = temp_calc();
 
     stats->time_ponto += t1 - t0;
@@ -230,17 +215,13 @@ int gradiente_conjugado(
 
     for (int k = 0; k < iter; k++) {
         t0 = temp_calc();
-        LIKWID_MARKER_START("matvec");
         multiplicacao_matrizes(A, p, Ap);
-        LIKWID_MARKER_STOP("matvec");
         t1 = temp_calc();
 
         stats->time_matvec += t1 - t0;
 
         t0 = temp_calc();
-        LIKWID_MARKER_START("dot");
         double pAp = produto(p, Ap, n);
-        LIKWID_MARKER_STOP("dot");
         t1 = temp_calc();
 
         stats->time_ponto += t1 - t0;
@@ -253,20 +234,16 @@ int gradiente_conjugado(
         double alpha = rs_antigo / pAp;
 
         t0 = temp_calc();
-        LIKWID_MARKER_START("update_x_r");
         for (int i = 0; i < n; i++) {
             x[i] = x[i] + alpha * p[i];
             r[i] = r[i] - alpha * Ap[i];
         }
-        LIKWID_MARKER_STOP("update_x_r");
         t1 = temp_calc();
 
         stats->time_att += t1 - t0;
 
         t0 = temp_calc();
-        LIKWID_MARKER_START("dot");
         double rs_novo = produto(r, r, n);
-        LIKWID_MARKER_STOP("dot");
         t1 = temp_calc();
 
         stats->time_ponto += t1 - t0;
@@ -283,11 +260,9 @@ int gradiente_conjugado(
         double beta = rs_novo / rs_antigo;
 
         t0 = temp_calc();
-        LIKWID_MARKER_START("update_p");
         for (int i = 0; i < n; i++) {
             p[i] = r[i] + beta * p[i];
         }
-        LIKWID_MARKER_STOP("update_p");
         t1 = temp_calc();
 
         stats->time_att += t1 - t0;
@@ -317,16 +292,12 @@ double erro_max(const double *x, const double *x_true, int n) {
 }
 
 int main(int args, char **argv) {
-    LIKWID_MARKER_INIT;
-    LIKWID_MARKER_THREADINIT;
-
     if (args < 6) {
         printf("Uso:\n");
         printf("%s <n> <bandas> <seed> <tol> <max_iter>\n\n", argv[0]);
         printf("Exemplos:\n");
         printf("%s 1024 7 42 1e-8 10000\n", argv[0]);
         printf("%s 4096 27 42 1e-8 10000\n", argv[0]);
-        LIKWID_MARKER_CLOSE;
         return 1;
     }
 
@@ -338,7 +309,6 @@ int main(int args, char **argv) {
 
     if (banda != 7 && banda != 27) {
         printf("Erro, banda deve ser 7 ou 27.\n");
-        LIKWID_MARKER_CLOSE;
         return 1;
     }
 
@@ -354,10 +324,8 @@ int main(int args, char **argv) {
     double total_comeco = temp_calc();
 
     double t0 = temp_calc();
-    LIKWID_MARKER_START("geracao_matriz");
     bandaMatriz *A = cria_matriz(n, banda);
     gerar_banda_espalhada_matriz(A, seed);
-    LIKWID_MARKER_STOP("geracao_matriz");
     double t1 = temp_calc();
 
     double time_generation = t1 - t0;
@@ -372,7 +340,6 @@ int main(int args, char **argv) {
         free(b);
         free(x);
         free_matrix(A);
-        LIKWID_MARKER_CLOSE;
         exit(1);
     }
 
@@ -380,9 +347,7 @@ int main(int args, char **argv) {
     preenche_vetor(x, n, 0.0);
 
     t0 = temp_calc();
-    LIKWID_MARKER_START("geracao_b");
     multiplicacao_matrizes(A, x_true, b);
-    LIKWID_MARKER_STOP("geracao_b");
     t1 = temp_calc();
 
     double time_generate_b = t1 - t0;
@@ -390,9 +355,7 @@ int main(int args, char **argv) {
     GCstatus status;
 
     t0 = temp_calc();
-    LIKWID_MARKER_START("gradiente_conjugado");
     gradiente_conjugado(A, b, x, max_iter, tol, &status);
-    LIKWID_MARKER_STOP("gradiente_conjugado");
     t1 = temp_calc();
 
     double tempo_gc = t1 - t0;
@@ -419,8 +382,6 @@ int main(int args, char **argv) {
     free(b);
     free(x);
     free_matrix(A);
-
-    LIKWID_MARKER_CLOSE;
 
     return 0;
 }
