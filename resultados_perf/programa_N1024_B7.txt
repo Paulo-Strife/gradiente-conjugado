@@ -1,0 +1,22 @@
+========================================
+Gradiente Conjugado - Matriz por bandas
+n         = 1024
+bands     = 7
+seed      = 42
+tol       = 1.00e-08
+max_iter  = 10000
+========================================
+
+Resultado:
+Iteracoes                  : 20
+Residuo final              : 3.522544468857e-09
+Erro maximo contra x_true  : 5.099203281844e-10
+
+Tempos:
+Geracao da matriz          : 0.000137 s
+Geracao do vetor b         : 0.000009 s
+Tempo total CG             : 0.000285 s
+  Tempo em matvec          : 0.000137 s
+  Tempo em dot products    : 0.000068 s
+  Tempo em updates vetores : 0.000065 s
+Tempo total do programa    : 0.000445 s

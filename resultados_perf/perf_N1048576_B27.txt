@@ -1,0 +1,22 @@
+
+ Performance counter stats for './conjugated_method 1048576 27 42 1e-8 10000':
+
+     1,636,285,711      cpu_atom/cycles/                                                        (1.46%)
+     2,768,768,490      cpu_core/cycles/                                                        (98.54%)
+     2,110,430,079      cpu_atom/instructions/           #    1.29  insn per cycle              (1.46%)
+     5,929,611,789      cpu_core/instructions/           #    2.14  insn per cycle              (98.54%)
+        10,290,440      cpu_atom/cache-references/                                              (1.46%)
+       167,260,237      cpu_core/cache-references/                                              (98.54%)
+         7,788,439      cpu_atom/cache-misses/           #   75.69% of all cache refs           (1.46%)
+       101,241,952      cpu_core/cache-misses/           #   60.53% of all cache refs           (98.54%)
+       426,843,994      cpu_atom/branches/                                                      (1.46%)
+       734,365,359      cpu_core/branches/                                                      (98.54%)
+         1,425,199      cpu_atom/branch-misses/          #    0.33% of all branches             (1.46%)
+           525,294      cpu_core/branch-misses/          #    0.07% of all branches             (98.54%)
+
+       1.168501207 seconds time elapsed
+
+       1.081389000 seconds user
+       0.086950000 seconds sys
+
+

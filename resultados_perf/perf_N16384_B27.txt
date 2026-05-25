@@ -1,0 +1,22 @@
+
+ Performance counter stats for './conjugated_method 16384 27 42 1e-8 10000':
+
+        33,273,092      cpu_atom/cycles/                                                        (58.47%)
+        40,387,442      cpu_core/cycles/                                                        (41.53%)
+        72,425,064      cpu_atom/instructions/           #    2.18  insn per cycle              (58.47%)
+       100,251,962      cpu_core/instructions/           #    2.48  insn per cycle              (41.53%)
+           546,945      cpu_atom/cache-references/                                              (58.47%)
+         1,099,187      cpu_core/cache-references/                                              (41.53%)
+            77,508      cpu_atom/cache-misses/           #   14.17% of all cache refs           (58.47%)
+            94,440      cpu_core/cache-misses/           #    8.59% of all cache refs           (41.53%)
+        10,028,650      cpu_atom/branches/                                                      (58.47%)
+        11,681,186      cpu_core/branches/                                                      (41.53%)
+            13,963      cpu_atom/branch-misses/          #    0.14% of all branches             (58.47%)
+            28,277      cpu_core/branch-misses/          #    0.24% of all branches             (41.53%)
+
+       0.028352628 seconds time elapsed
+
+       0.023408000 seconds user
+       0.004876000 seconds sys
+
+
