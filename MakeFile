@@ -11,10 +11,10 @@ else
     RM = rm -f
 endif
 
-all: baseline v1 v2 v3
+all: cgSolver v1 v2 v3
 
-baseline:
-	$(CC) $(CFLAGS) conjugated_method.c -o conjugated_method$(EXE) $(LDFLAGS)
+cgSolver:
+	$(CC) $(CFLAGS) conjugated_method.c -o cgSolver$(EXE) $(LDFLAGS)
 
 v1:
 	$(CC) $(CFLAGS) conjugated_methodv1.c -o conjugated_methodv1$(EXE) $(LDFLAGS)
