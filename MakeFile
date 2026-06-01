@@ -1,28 +1,29 @@
 CC = gcc
 
-CFLAGS = -Wall -Wextra
+CFLAGS = -Wall -Wextra -O3
 LDFLAGS = -lm
 
-SRC = cgSolver.c
-
 ifeq ($(OS),Windows_NT)
-    TARGET = cgSolver.exe
+    EXE = .exe
     RM = del /Q
 else
-    TARGET = cgSolver
+    EXE =
     RM = rm -f
 endif
 
-all: release
+all: baseline v1 v2 v3
 
-debug: CFLAGS += -O0 -g
-debug: $(TARGET)
+baseline:
+	$(CC) $(CFLAGS) conjugated_method.c -o conjugated_method$(EXE) $(LDFLAGS)
 
-release: CFLAGS += -O3
-release: $(TARGET)
+v1:
+	$(CC) $(CFLAGS) conjugated_methodv1.c -o conjugated_methodv1$(EXE) $(LDFLAGS)
 
-$(TARGET): $(SRC)
-	$(CC) $(CFLAGS) $(SRC) -o $(TARGET) $(LDFLAGS)
+v2:
+	$(CC) $(CFLAGS) conjugated_methodv2.c -o conjugated_methodv2$(EXE) $(LDFLAGS)
+
+v3:
+	$(CC) $(CFLAGS) conjugated_methodv3.c -o conjugated_methodv3$(EXE) $(LDFLAGS)
 
 clean:
-	$(RM) $(TARGET)
+	$(RM) *$(EXE)
