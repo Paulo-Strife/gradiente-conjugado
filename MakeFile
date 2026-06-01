@@ -1,13 +1,28 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -O2
+
+CFLAGS = -Wall -Wextra
 LDFLAGS = -lm
-TARGET = cgSolver.exe
+
 SRC = cgSolver.c
 
-all: $(TARGET)
+ifeq ($(OS),Windows_NT)
+    TARGET = cgSolver.exe
+    RM = del /Q
+else
+    TARGET = cgSolver
+    RM = rm -f
+endif
+
+all: release
+
+debug: CFLAGS += -O0 -g
+debug: $(TARGET)
+
+release: CFLAGS += -O3
+release: $(TARGET)
 
 $(TARGET): $(SRC)
 	$(CC) $(CFLAGS) $(SRC) -o $(TARGET) $(LDFLAGS)
 
 clean:
-	del /Q $(TARGET)
+	$(RM) $(TARGET)
